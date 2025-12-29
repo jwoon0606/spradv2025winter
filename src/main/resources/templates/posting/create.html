@@ -82,6 +82,10 @@ images :
             method: 'POST',
             data : JSON.stringify(_data),
             contentType:"application/json",
+            headers: {  // header에 정보 넣어주기
+                "title": $("#input_title").val(),
+                "userId": userId,
+            },
             success: function (data, status, xhr) {
                 alert("data :" + JSON.stringify(data));
             },
