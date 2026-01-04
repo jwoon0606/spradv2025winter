@@ -11,9 +11,7 @@ import com.thc.sprbasic2025fall.service.PostingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -40,15 +38,28 @@ public class PostingServiceImpl implements PostingService {
     }
 
     @Override
-    public void update(PostingDto.UpdateReqDto param) {
+    public void update(PostingDto.UpdateReqDto param, Long userId) {
         Posting posting = postingRepository.findById(param.getId()).orElseThrow(() -> new RuntimeException("no data"));
+        if(!userId.equals(posting.getUserId())) {
+            throw new RuntimeException("you don't have permission to update posting");
+        }
         posting.update(param);
         postingRepository.save(posting);
     }
 
     @Override
-    public void delete(PostingDto.UpdateReqDto param) {
-        update(PostingDto.UpdateReqDto.builder().id(param.getId()).deleted(true).build());
+    public void delete(PostingDto.UpdateReqDto param, Long userId) {
+        update(PostingDto.UpdateReqDto.builder().id(param.getId()).deleted(true).build(), userId);
+    }
+
+
+    @Override
+    public PostingDto.DetailResDto detail(DefaultDto.DetailReqDto param, Long userId) {
+        Posting posting = postingRepository.findById(param.getId()).orElseThrow(() -> new RuntimeException("no data"));
+        if(!userId.equals(posting.getUserId())) {
+            throw new RuntimeException("you don't have permission to access the posting");
+        }
+        return get(param);
     }
 
     public PostingDto.DetailResDto get(DefaultDto.DetailReqDto param) {
@@ -56,11 +67,6 @@ public class PostingServiceImpl implements PostingService {
         System.out.println("res??? : " + res);
         res.setImgs(postimgService.list(PostimgDto.ListReqDto.builder().deleted(false).postingId(res.getId()).build()));
         return res;
-    }
-
-    @Override
-    public PostingDto.DetailResDto detail(DefaultDto.DetailReqDto param) {
-        return get(param);
     }
 
     public List<PostingDto.DetailResDto> addlist(List<PostingDto.DetailResDto> list) {
@@ -72,10 +78,15 @@ public class PostingServiceImpl implements PostingService {
     }
 
     @Override
-    public List<PostingDto.DetailResDto> list(PostingDto.ListReqDto param) {
-        List<PostingDto.DetailResDto> list = new ArrayList<>();
+    public List<PostingDto.DetailResDto> list(PostingDto.ListReqDto param, Long userId) {
         List<PostingDto.DetailResDto> postings = postingMapper.list(param);
-        return addlist(postings);
+
+        List<PostingDto.DetailResDto> filtered = new ArrayList<>();
+        for (PostingDto.DetailResDto posting : postings) {
+            if(Objects.equals(posting.getUserId(), userId)) filtered.add(posting);
+        }
+
+        return addlist(filtered);
     }
     @Override
     public DefaultDto.PagedListResDto pagedList(PostingDto.PagedListReqDto param) {

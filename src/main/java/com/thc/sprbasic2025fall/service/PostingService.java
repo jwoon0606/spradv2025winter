@@ -11,10 +11,10 @@ import java.util.Map;
 @Service
 public interface PostingService {
     DefaultDto.CreateResDto create(PostingDto.CreateReqDto param);
-    void update(PostingDto.UpdateReqDto param);
-    void delete(PostingDto.UpdateReqDto param);
-    PostingDto.DetailResDto detail(DefaultDto.DetailReqDto param);
-    List<PostingDto.DetailResDto> list(PostingDto.ListReqDto param);
+    void update(PostingDto.UpdateReqDto param, Long userId);
+    void delete(PostingDto.UpdateReqDto param, Long userId);
+    PostingDto.DetailResDto detail(DefaultDto.DetailReqDto param, Long userId);
+    List<PostingDto.DetailResDto> list(PostingDto.ListReqDto param, Long userId);
     DefaultDto.PagedListResDto pagedList(PostingDto.PagedListReqDto param);
     List<PostingDto.DetailResDto> scrollList(PostingDto.ScrollListReqDto param);
 }

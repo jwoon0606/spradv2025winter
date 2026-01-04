@@ -29,7 +29,7 @@ images :
             tempFile = inputFile.files[0];
         }
 
-        // FormData 준비
+// FormData 준비
         let formData = new FormData();
         formData.append('file', tempFile);
 
@@ -58,45 +58,57 @@ images :
 
         let userId = localStorage.getItem("userId");
         if(userId === null || userId + "" === "" || userId + "" === "undefined"){
-            alert("로그인 먼저 해주세요!");
-            location.href = "/user/login";
-            return false;
-        }
-
-        let _data = {
-            title : $("#input_title").val()
-            , content : $("#input_content").val()
-            , img : $("#input_img").val()
-            , userId : userId
-        }
-        let input_imgs = $(".input_imgs");
-        let imgs = [];
-        for(let each of input_imgs){
-            imgs.push($(each).val());
-        }
-        _data["imgs"] = imgs;
-
-        $.ajax({
-            //
-            url: '/api/posting',
-            method: 'POST',
-            data : JSON.stringify(_data),
-            contentType:"application/json",
-            headers: {  // header에 정보 넣어주기
-                "title": $("#input_title").val(),
-                "userId": userId,
-            },
-            success: function (data, status, xhr) {
-                alert("data :" + JSON.stringify(data));
-            },
-            error: function (data, status, err) {
-                alert("error :" + JSON.stringify(data));
-            },
-            complete: function () {
+            let is_loggedin = false;
+            let refreshToken = localStorage.getItem("refreshToken");
+            if(refreshToken === null || refreshToken + "" === "" || refreshToken + "" === "undefined"){
+            } else {
+                if(refreshToken.startsWith("Bearer ")){
+                    is_loggedin = true;
+                }
             }
-        });
-    }
+            if(!is_loggedin){
+                alert("로그인 먼저 해주세요!");
+                location.href = "/user/login";
+                return false;
+            }
+
+            let _data = {
+                title : $("#input_title").val()
+                , content : $("#input_content").val()
+                , img : $("#input_img").val()
+//, userId : userId
+            }
+            let input_imgs = $(".input_imgs");
+            let imgs = [];
+            for(let each of input_imgs){
+                imgs.push($(each).val());
+            }
+            _data["imgs"] = imgs;
+
+            let accessToken = localStorage.getItem("accessToken") + "";
+
+            $.ajax({
+//
+                url: '/api/posting',
+                method: 'POST',
+
+                beforeSend : function(xhr){
+                    xhr.setRequestHeader("userId", userId);
+                    xhr.setRequestHeader("Authorization", accessToken);
+                },
+
+                data : JSON.stringify(_data),
+                contentType:"application/json",
+                success: function (data, status, xhr) {
+                    alert("data :" + JSON.stringify(data));
+                },
+                error: function (data, status, err) {
+                    alert("error :" + JSON.stringify(data));
+                },
+                complete: function () {
+                }
+            });
+        }
 </script>
 
 </body>
-</html>

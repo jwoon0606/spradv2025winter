@@ -37,22 +37,29 @@ public class TokenFactory {
     // 엑세스 토큰 만들기
     public String createAccessToken(String refreshToken) {
         Long userId = validateToken(refreshToken);
+        if(userId == null){
+            return null;
+        }
 
         RefreshToken entity = refreshTokenRepository.findByContent(refreshToken);
         if(entity == null){
             return null;
         }
+
         Long userIdFromToken = entity.getUserId();
-        System.out.println("userIdFromToken : " + userIdFromToken);
         if(!userIdFromToken.equals(userId)){
             return null;
         }
 
-        System.out.println("userId : " + userId);
-        if(userId == null){
-            return null;
-        }
         return createToken(userId, accessTokenValidityHour);
+    }
+
+    public Long validateAccessToken(String token) {
+        Long userId = validateToken(token);
+        if(userId == null) {
+            throw new RuntimeException("please check your RefreshToken");
+        }
+        return userId; //엑세스토큰 검증!
     }
 
     public Long validateToken(String token) {

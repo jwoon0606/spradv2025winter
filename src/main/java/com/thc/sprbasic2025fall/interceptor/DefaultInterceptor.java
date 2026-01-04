@@ -1,5 +1,6 @@
 package com.thc.sprbasic2025fall.interceptor;
 
+import com.thc.sprbasic2025fall.util.TokenFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -15,17 +16,31 @@ import java.util.Enumeration;
 public class DefaultInterceptor implements HandlerInterceptor {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    final TokenFactory tokenFactory;
+    public DefaultInterceptor(TokenFactory tokenFactory) {
+        this.tokenFactory = tokenFactory;
+    }
 
     //컨트롤러 진입 전에 호출되는 메서드
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        logger.info("preHandle / request [{}]", request);
+        String accessToken = request.getHeader("Authorization");
 
-        String title = request.getHeader("title");  // 헤더 정보는 getHeader()로 받아오기
-        String userId = request.getHeader("userId");
+        Long userId = null;
+        if(accessToken != null && accessToken.startsWith("Bearer ")) {
+            accessToken = accessToken.substring(7);
+            userId = tokenFactory.validateAccessToken(accessToken);
+        }
+        request.setAttribute("userId", userId); //앞으로 userId가 null이면 모두 돌려보내야됨
 
-        System.out.println("title = " + title);
-        System.out.println("userId = " + userId);
+        // 헤더 정보 가져와보기
+//        logger.info("preHandle / request [{}]", request);
+//
+//        String title = request.getHeader("title");  // 헤더 정보는 getHeader()로 받아오기
+//        String userId = request.getHeader("userId");
+//
+//        System.out.println("title = " + title);
+//        System.out.println("userId = " + userId);
 
         return true;
     }

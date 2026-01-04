@@ -26,17 +26,17 @@ public class AuthRestController {
     @PostMapping("")
     public ResponseEntity<Void> access(HttpServletRequest request) {
         String refreshToken = request.getHeader("RefreshToken");
-        if(!refreshToken.startsWith("Bearer ")) {
+        if(!refreshToken.startsWith("Bearer ")) {   //RefreshToken이 prefix로 시작하지 않으면 돌려보내기
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        refreshToken = refreshToken.substring(7);
+        refreshToken = refreshToken.substring(7);   //prefix 제거
 
-        String accessToken = tokenFactory.createAccessToken(refreshToken);
-        if(accessToken == null) {
+        String accessToken = tokenFactory.createAccessToken(refreshToken);  //accessToken 발급
+        if(accessToken == null) {   //accessToken 정상 발급 확인
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok().header("Authorization", "Bearer " + accessToken).build();
+        return ResponseEntity.ok().header("Authorization", "Bearer " + accessToken).build();    //헤더에 prefix 포함된 AccessToken 전달
     }
 
 }
